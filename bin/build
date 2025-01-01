@@ -2,10 +2,16 @@
 
 set -euo pipefail
 
-BUILD_DIR=$1
-CACHE_DIR=$2
-ENV_DIR=$3
-LAYER_DIR=$4
+BUILD_DIR=${1:-}
+CACHE_DIR=${2:-}
+ENV_DIR=${3:-}
+LAYER_DIR=${4:-}
+
+# Validate required arguments
+if [ -z "$BUILD_DIR" ] || [ -z "$LAYER_DIR" ]; then
+    echo "Error: BUILD_DIR and LAYER_DIR are required"
+    exit 1
+fi
 
 # Create the bin directory in the build layer
 INSTALL_DIR=$LAYER_DIR/caddy
