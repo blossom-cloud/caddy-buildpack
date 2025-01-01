@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+BUILD_DIR=$1
+CACHE_DIR=$2
+ENV_DIR=$3
+LAYER_DIR=$4
+
+# Create the bin directory in the build layer
+INSTALL_DIR=$LAYER_DIR/caddy
+mkdir -p $INSTALL_DIR/bin
+
+echo "-----> Installing Caddy with custom modules"
+
+# Download and install Go (required for xcaddy)
+GO_VERSION="1.23.4"
+curl -sSL "https://golang.org/dl/go${GO_VERSION}.linux-amd64.tar.gz" | tar -xz -C /tmp
+export PATH=$PATH:/tmp/go/bin
+
+# Install xcaddy
+go install github.com/caddyserver/xcaddy/cmd/xcaddy@latest
+
+# Build custom Caddy
+cd $INSTALL_DIR/bin
+/root/go/bin/xcaddy build \
+    --with github.com/caddy-dns/route53 \
+    --with github.com/caddy-dns/cloudflare \
+    --with github.com/caddy-dns/digitalocean \
+    --with github.com/caddy-dns/hetzner
+
+# Make caddy executable
+chmod +x $INSTALL_DIR/bin/caddy
+
+# Create layer.toml
+cat > "$LAYER_DIR/caddy.toml" << EOL
+launch = true
+cache = true
+
+[types]
+launch = true
+cache = true
+EOL
+
+# Add Caddy to the PATH
+mkdir -p $LAYER_DIR/env
+echo "$INSTALL_DIR/bin" > "$LAYER_DIR/env/PATH.append"

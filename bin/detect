@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+# Always enable this buildpack
+exit 0
+

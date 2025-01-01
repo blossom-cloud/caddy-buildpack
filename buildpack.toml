@@ -1,0 +1,9 @@
+api = "0.7"
+
+[buildpack]
+id = "blossom-cloud/caddy"
+version = "0.1.0"
+name = "Caddy Buildpack"
+
+[[stacks]]
+id = "heroku-24"
